@@ -4,7 +4,8 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const User = require('./models/User');
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient('https://kxjicnfnlpdlftglbwjj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4amljbmZubHBkbGZ0Z2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MDIwMTAsImV4cCI6MjA3MzI3ODAxMH0.wcKrLaMfYe1xqYJSA7GAiZJjY_clhMcD49zulvcI0Ws');
 const Otp = require('./models/Otp');
 const twilio = require('twilio');
 const app = express();
@@ -18,14 +19,36 @@ mongoose.connect('mongodb://localhost:27017/civicpulse', {
 });
 
 
-// Configure nodemailer with Gmail SMTP for production
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'subhasishrath6@gmail.com', // <-- CHANGE THIS
-    pass: 'subhasishgmail@00',   // <-- CHANGE THIS
-  },
-});
+const CLIENT_ID = '790342324886-uiol9crh793i5ihn5fvq0i29punlk6l0.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = 'YOUR_REFRESH_TOKEN';
+
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+async function createTransporter() {
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: 'subhasishrath6@gmail.com',
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken.token,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to create transporter', error);
+  }
+}
 
 // Configure Twilio for SMS OTP
 const TWILIO_ACCOUNT_SID = 'ACd7c65c4094a7863d45a7308c95981da6';
@@ -35,24 +58,23 @@ const TWILIO_CONTENT_SID = 'HXb5b62575e6e4ff6129ad7c8efe1f983e';
 const twilioClient = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 
-// Request OTP endpoint (production-ready)
 app.post('/api/request-otp', async (req, res) => {
   const { email, phone } = req.body;
 
   if (!email && !phone) return res.status(400).json({ error: 'Email or phone required' });
 
-  // Check if user exists in DB (allow any user to request OTP for password reset)
-  let user;
+  // Check user existence via Supabase for email
   if (email) {
-    user = await User.findOne({ email });
-    if (!user) {
-      // Optionally, create a user record or return error
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
+    if (userError || !userData) {
       return res.status(404).json({ error: 'User not found' });
     }
-  } else if (phone) {
-    user = await User.findOne({ phone });
+  }
+
+  // For phone, simplified check
+  if (phone) {
+    const user = await Otp.findOne({ identifier: phone }); // Simplified check
     if (!user) {
-      // Optionally, create a user record or return error
       return res.status(404).json({ error: 'User not found' });
     }
   }
