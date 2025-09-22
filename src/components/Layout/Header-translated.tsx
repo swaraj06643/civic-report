@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { NotificationDropdown } from "@/components/Notifications/NotificationDropdown";
 import { ThemeToggle } from "@/components/Theme/ThemeToggle";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 // Knowledge base from chatbot for answering queries
 const FAQs = [
@@ -30,6 +31,7 @@ function answerFromKnowledgeBase(message: string): string {
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const { t } = useTranslation();
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
@@ -84,7 +86,7 @@ export const Header = () => {
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-foreground">CivicReport</h1>
               <p className="text-xs text-muted-foreground">
-                Government Digital Platform
+                {t("header.subtitle", "Government Digital Platform")}
               </p>
             </div>
           </div>
@@ -92,28 +94,34 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <a
+              href="/"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+            >
+              {t("navigation.home")}
+            </a>
+            <a
               href="/report"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              Report Issue
+              {t("navigation.report")}
             </a>
             <a
               href="/map"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              Map Explorer
+              {t("navigation.map")}
             </a>
             <a
               href="/about"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              About
+              {t("navigation.about")}
             </a>
             <a
               href="/contact"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              Contact
+              {t("navigation.contact")}
             </a>
           </nav>
 
@@ -144,7 +152,7 @@ export const Header = () => {
               className="hidden sm:flex btn-civic-primary"
               onClick={() => (window.location.href = "/login")}
             >
-              Login
+              {t("navigation.login")}
             </Button>
 
             {/* Mobile Menu Button */}
@@ -173,35 +181,41 @@ export const Header = () => {
           >
             <nav className="flex flex-col space-y-3">
               <a
+                href="/"
+                className="text-foreground hover:text-primary transition-colors font-medium py-2"
+              >
+                {t("navigation.home")}
+              </a>
+              <a
                 href="/report"
                 className="text-foreground hover:text-primary transition-colors font-medium py-2"
               >
-                Report Issue
+                {t("navigation.report")}
               </a>
               <a
                 href="/map"
                 className="text-foreground hover:text-primary transition-colors font-medium py-2"
               >
-                Map Explorer
+                {t("navigation.map")}
               </a>
               <a
                 href="/about"
                 className="text-foreground hover:text-primary transition-colors font-medium py-2"
               >
-                About
+                {t("navigation.about")}
               </a>
               <a
                 href="/contact"
                 className="text-foreground hover:text-primary transition-colors font-medium py-2"
               >
-                Contact
+                {t("navigation.contact")}
               </a>
               <div className="flex flex-col space-y-2 pt-4">
                 <Button
                   className="btn-civic-primary w-full"
                   onClick={() => (window.location.href = "/login")}
                 >
-                  Login
+                  {t("navigation.login")}
                 </Button>
               </div>
             </nav>
