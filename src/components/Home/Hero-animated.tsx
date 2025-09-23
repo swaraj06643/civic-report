@@ -10,16 +10,13 @@ import {
   BarChart3,
   Sparkles,
 } from "lucide-react";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 
 export const Hero = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [displayText, setDisplayText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const fullText = "Building Communities";
 
   const handleReportIssue = () => {
     fileInputRef.current?.click();
@@ -38,17 +35,6 @@ export const Hero = () => {
   const handleExploreMap = () => {
     navigate("/map");
   };
-
-  useEffect(() => {
-    if (currentIndex < fullText.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + fullText[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, 100); // Typing speed - 100ms per character
-
-      return () => clearTimeout(timeout);
-    }
-  }, [currentIndex, fullText]);
 
   return (
     <>
@@ -115,17 +101,41 @@ export const Hero = () => {
               >
                 <span>Empowering Citizens</span>
                 <br />
-                <span className="gradient-hero bg-clip-text text-transparent">
-                  {displayText}
-                  {currentIndex < fullText.length && (
-                    <motion.span
-                      animate={{ opacity: [1, 0] }}
-                      transition={{ duration: 0.5, repeat: Infinity }}
-                      className="ml-1"
-                    >
-                      |
-                    </motion.span>
-                  )}
+                <span className="relative inline-block">
+                  <span className="gradient-hero bg-clip-text text-transparent relative z-10">
+                    Building Communities
+                  </span>
+                  {/* Animated Frame Border */}
+                  <motion.div
+                    className="absolute -inset-2 rounded-xl opacity-60"
+                    style={{
+                      background: `linear-gradient(45deg, transparent 30%, hsl(var(--primary)) 50%, transparent 70%)`,
+                      backgroundSize: '200% 200%',
+                    }}
+                    animate={{
+                      backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
+                  {/* Outer Glow Ring */}
+                  <motion.div
+                    className="absolute -inset-4 rounded-xl"
+                    style={{
+                      background: `conic-gradient(from 0deg, transparent 0deg, hsl(var(--primary)/0.3) 90deg, transparent 180deg, hsl(var(--primary)/0.3) 270deg, transparent 360deg)`,
+                    }}
+                    animate={{
+                      rotate: 360,
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
                 </span>
               </motion.h1>
             </motion.div>
